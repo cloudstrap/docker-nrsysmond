@@ -1,0 +1,5 @@
+NRSYSMONDVERSION=2.3.0.132
+rootname=cloudstrap
+
+docker build -t ${rootname}/nrsysmond:${NRSYSMONDVERSION} .
+docker tag ${rootname}/nrsysmond:${NRSYSMONDVERSION}  ${rootname}/nrsysmond:latest

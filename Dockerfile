@@ -1,20 +1,19 @@
-#
-# Sample Dockerfile for the New Relic Linux Server Monitor. This is intended
-# to be used from the extracted tar file directory of a given LSM release.
-# Therefore, it is extremely simple as it does not need to download anything.
-#
-# All configuration is handled by environment variables, and requires at least
-# version 2.1.0.117 or later of the LSM agent, which is when the -E flag and
-# support for environment variables was added.
-#
+FROM centos:7
 
-FROM ubuntu:14.04
-MAINTAINER New Relic <support@newrelic.com>
+MAINTAINER CloudStrap <support@cloudstrap.io>
 
-# The following line requires Docker 1.6 but is ignored by earlier versions,
-# albeit with a warning.
-LABEL Description="New Relic Linux Server Monitor" vendor="New Relic Inc."
+ENV NRSYSMOND_VERSION 2.3.0.132
 
-ADD nrsysmond.x64 /usr/sbin/nrsysmond
+LABEL io.k8s.description="New Relic Linux Server Monitor" \
+      io.k8s.display-name="nrsysmond"
+
+RUN   mkdir /etc/newrelic && \
+      curl -o newrelic-sysmond.tar.gz -SL https://download.newrelic.com/server_monitor/archive/${NRSYSMOND_VERSION}/newrelic-sysmond-${NRSYSMOND_VERSION}-linux.tar.gz && \
+      tar -xvzf newrelic-sysmond.tar.gz && \
+      cp newrelic-sysmond-${NRSYSMOND_VERSION}-linux/daemon/nrsysmond.x64 /usr/sbin/nrsysmond && \
+      cp newrelic-sysmond-${NRSYSMOND_VERSION}-linux/scripts/nrsysmond-config /usr/local/sbin && \
+      cp newrelic-sysmond-${NRSYSMOND_VERSION}-linux/nrsysmond.cfg /etc/newrelic/ && \
+      sed -i 's/^#host_root=\/host/host_root=\/host/g' /etc/newrelic/nrsysmond.cfg && \
+      rm -rf newrelic-sysmond-*-linux*
 
 CMD /usr/sbin/nrsysmond -E -F
